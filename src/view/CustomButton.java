@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,9 +17,18 @@ import java.util.ArrayList;
 
 import javax.swing.ButtonModel;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JToggleButton;
+import javax.swing.SwingConstants;
 
-public class CustomButton extends JToggleButton{
+import controller.Tile;
+import model.SavedVariables;
+
+public class CustomButton extends JToggleButton implements Tile{
+	
+	/*
+	 * GUI variables
+	 */
 	
 	private int x;
 	private int y;
@@ -30,12 +40,24 @@ public class CustomButton extends JToggleButton{
 	 * 2 - MARKED
 	 */
 	private int currState;
-	private static final int rectSize = 25;
+
+	private int rectSize;
 	private ArrayList<CustomButton> neighbours;
 	
 	private static final int TRANSPARENT = 0;
 	private static final int HALF_TRANSPARENT = 127;
 	private static final int OPAQUE = 255;
+	
+	private static final Color[] colors = new Color[]{
+			Color.BLACK, Color.BLUE, Color.GREEN, Color.RED, Color.CYAN, Color.ORANGE, Color.MAGENTA, Color.DARK_GRAY
+	};
+
+	/*
+	 * Logic variables
+	 */
+	
+	private boolean isMine;
+	private int minesAround = 0;
 	
 	public CustomButton(int x, int y, double range){
 		super();
@@ -46,7 +68,9 @@ public class CustomButton extends JToggleButton{
 		this.currState = 0;
 		neighbours = new ArrayList<CustomButton>();
 		
-		setPreferredSize(new Dimension(25,25));
+		rectSize = SavedVariables.getButtonSize();
+		
+		setMargin(new Insets(0,0,0,0));
 		setIcons();
 		setRolloverEnabled(true);
 		setBorderPainted(false);
@@ -97,6 +121,30 @@ public class CustomButton extends JToggleButton{
 	
 	public ArrayList<CustomButton> getNeighbours(){
 		return neighbours;
+	}
+	
+	public void setAsMine(boolean flag){
+		isMine = flag;
+	}
+	
+	public void incrementMineCount(){
+		minesAround++;
+	}
+	
+	public boolean isMine(){
+		return isMine;
+	}
+	
+	public void revealNumber(){
+		setHorizontalTextPosition(SwingConstants.CENTER);
+		if(!isMine){
+			if(minesAround != 0){
+	//			setForeground(colors[minesAround]);
+				setForeground(Color.RED);
+				setText(Integer.toString(minesAround));
+			}
+		}
+		else setText("M");
 	}
 	
 	/*
@@ -171,6 +219,21 @@ public class CustomButton extends JToggleButton{
 	
 		return new ImageIcon(image);
 		
+	}
+	
+	@Override
+	public Dimension getPreferredSize() {
+		return SavedVariables.getDimension();
+	}
+	
+	@Override
+	public Dimension getMaximumSize() {
+		return SavedVariables.getDimension();
+	}
+	
+	@Override
+	public Dimension getMinimumSize() {
+		return SavedVariables.getDimension();
 	}
 			
 }

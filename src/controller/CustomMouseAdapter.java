@@ -12,6 +12,12 @@ import view.CustomButton;
 
 public class CustomMouseAdapter extends MouseAdapter{
 	
+	private ChangeButtonListener listener;
+	
+	public void addChangeButtonListener(ChangeButtonListener listener){
+		this.listener = listener;
+	}
+	
 	/*
 	@Override
 	public void mouseClicked(MouseEvent arg0){
@@ -42,7 +48,11 @@ public class CustomMouseAdapter extends MouseAdapter{
 		if(button != null){
 			if(!Flags.bothPressed()){
 				if(evt.getButton() == 1 && button.isEnabled() && !button.isFlagged()){
-					button.doClick();
+//					button.doClick();
+					/*
+					 * Najbardziej ³opatologiczne rozwiazanie
+					 */
+					button.revealNumber();
 					button.setStateZero();
 					button.setEnabled(false);
 					Flags.setLastEntered(null);	
@@ -98,5 +108,6 @@ public class CustomMouseAdapter extends MouseAdapter{
 		button.setState(false);
 		for(CustomButton b : buttons) b.setState(false);
 	}
+
 }
 
