@@ -6,14 +6,14 @@ import java.util.Random;
 
 import javax.swing.JToggleButton;
 
-import controller.ChangeButtonListener;
+import controller.StartListener;
 import controller.Tile;
 import view.CustomButton;
 
 public class Logic {
 	
 	private static Logic logic;
-	private ChangeButtonListener listener;
+	private StartListener listener;
 	
 	private Tile[][] tiles;
 	private int[][] mines;
@@ -25,7 +25,7 @@ public class Logic {
 		return logic != null ? logic : (logic = new Logic());
 	}
 	
-	public void generateMines(){
+	public void generateMines(CustomButton button){
 		Random rand = new Random();
 		
 		int x = SavedVariables.getX();
@@ -37,7 +37,14 @@ public class Logic {
 		List<Integer> randList = new ArrayList<Integer>(tilesCount);
 		for(int i=0; i<tilesCount; i++) randList.add(i);
 		
-		for(int i=0; i<minesCount; i++){
+		randList.remove(button.getRelativeX()*y + button.getRelativeY());
+		int i = 1;
+		for(CustomButton b : button.getNeighbours()){
+			randList.remove(randList.indexOf(b.getRelativeX()*y + b.getRelativeY()));
+			i++;
+		}
+		
+		for(; i<minesCount; i++){
 			tileNumber = randList.remove(rand.nextInt(tilesCount-i));
 			mineX = tileNumber / y;
 			mineY = tileNumber % y;
@@ -62,7 +69,7 @@ public class Logic {
 		this.tiles = buttons;
 	}
 
-	public void addChangeButtonListener(ChangeButtonListener listener){
+	public void addChangeButtonListener(StartListener listener){
 		this.listener = listener;
 	}
 }

@@ -82,6 +82,9 @@ public class CustomButton extends JToggleButton implements Tile{
 		setState(false);
 	}
 	
+	/*
+	 * Niepoprawna nazwa metody -> nie mozna wywnioskowac do czego ona miala sluzyc
+	 */
 	public void setState(boolean state){
 		if(isEnabled()){
 			ButtonModel model = getModel();
@@ -101,14 +104,13 @@ public class CustomButton extends JToggleButton implements Tile{
 	
 	public void setNextState(){
 		currState += currState != 2 ? 1 : -2;
-		System.out.println(currState);
 		setIcons();
 	}
 	
-	public void setStateZero(){
-		currState = 0;
-		setIcons();
-	}
+//	public void setRevealed(){
+//		currState = 3;
+//		setIcons();
+//	}
 	
 	public boolean isFlagged(){
 		return currState == 1;
@@ -135,13 +137,26 @@ public class CustomButton extends JToggleButton implements Tile{
 		return isMine;
 	}
 	
+	public boolean isEmpty(){
+		return !isMine && minesAround == 0;
+	}
+	
+	public boolean checkFlags(){
+		int nFlags = 0;
+		for(CustomButton b : neighbours){
+			if(b.isFlagged()) nFlags++;
+		}
+		
+		return !isEnabled() && nFlags == minesAround;
+	}
+	
 	public void revealNumber(){
+		
 		setHorizontalTextPosition(SwingConstants.CENTER);
+		currState = 3;
 		if(!isMine){
 			if(minesAround != 0){
-	//			setForeground(colors[minesAround]);
-				setForeground(Color.RED);
-				setText(Integer.toString(minesAround));
+				setDisabledIcon(createGraphics(TRANSPARENT));
 			}
 		}
 		else setText("M");
@@ -186,6 +201,12 @@ public class CustomButton extends JToggleButton implements Tile{
 		g2.setPaint(new GradientPaint(a, colorA, b, colorB ));
 		g2.fillRect(0, 0, 25, 25);
 		
+		/*
+		 * FontMetric: uzywane do przypadku 2 i 3
+		 */
+		FontMetrics fm = g2.getFontMetrics();
+		int xPosition = (rectSize - fm.stringWidth("?"))/2;
+        int yPosition = rectSize/2 + g2.getFont().getSize()/2;
 		
 		switch (this.currState) {
 		
@@ -207,11 +228,18 @@ public class CustomButton extends JToggleButton implements Tile{
 			g2.setColor(Color.WHITE);
 			g2.setFont(new Font(null, Font.PLAIN, rectSize - 5));
 			
-			FontMetrics fm = g2.getFontMetrics();
-			int xPosition = (rectSize - fm.stringWidth("?"))/2;
-            int yPosition = rectSize/2 + g2.getFont().getSize()/2;
-            
+//			FontMetrics fm = g2.getFontMetrics();
+//			int xPosition = (rectSize - fm.stringWidth("?"))/2;
+//            int yPosition = rectSize/2 + g2.getFont().getSize()/2;
+//            
 			g2.drawString("?", xPosition, yPosition);
+			break;
+			
+		case 3:
+			
+			g2.setColor(colors[minesAround]);
+			g2.setFont(new Font(null, Font.PLAIN, rectSize - 5));
+			g2.drawString(Integer.toString(minesAround), xPosition, yPosition);
 			break;
 		}
 		

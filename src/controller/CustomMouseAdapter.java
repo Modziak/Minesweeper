@@ -3,6 +3,7 @@ package controller;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ButtonModel;
 import javax.swing.JToggleButton;
@@ -12,9 +13,9 @@ import view.CustomButton;
 
 public class CustomMouseAdapter extends MouseAdapter{
 	
-	private ChangeButtonListener listener;
+	private StartListener listener;
 	
-	public void addChangeButtonListener(ChangeButtonListener listener){
+	public void addStartListener(StartListener listener){
 		this.listener = listener;
 	}
 	
@@ -44,21 +45,23 @@ public class CustomMouseAdapter extends MouseAdapter{
 	public void mouseReleased(MouseEvent evt){
 		
 		CustomButton button = Flags.getLastEntered();
-		
+
 		if(button != null){
+			if(!Flags.isStarted()) listener.generateBoard(button);
 			if(!Flags.bothPressed()){
 				if(evt.getButton() == 1 && button.isEnabled() && !button.isFlagged()){
-//					button.doClick();
 					/*
 					 * Najbardziej ³opatologiczne rozwiazanie
 					 */
-					button.revealNumber();
-					button.setStateZero();
 					button.setEnabled(false);
+					button.reset();
+					button.revealNumber();
+					if(button.isEmpty()) revealNeighbours(Flags.getLastEntered());
 					Flags.setLastEntered(null);	
 				}
 			}
 			else if(Flags.bothPressed()){
+				if(button.checkFlags()) revealNeighbours(Flags.getLastEntered());
 				clearNeigbours(Flags.getLastEntered());
 			}
 		}
@@ -100,13 +103,28 @@ public class CustomMouseAdapter extends MouseAdapter{
 	private void pressNeighbours(CustomButton button){
 		ArrayList<CustomButton> buttons = button.getNeighbours();
 		button.setState(true);
-		for(CustomButton b : buttons) b.setState(true);
+		for(CustomButton b : buttons){
+			if(!b.isFlagged()) b.setState(true);
+		}
 	}
 	
 	private void clearNeigbours(CustomButton button){
 		ArrayList<CustomButton> buttons = button.getNeighbours();
-		button.setState(false);
-		for(CustomButton b : buttons) b.setState(false);
+//		button.setState(false);
+//		for(CustomButton b : buttons) b.setState(false);
+//		button.reset();
+		for(CustomButton b : buttons) b.reset();
+	}
+	
+	private void revealNeighbours(CustomButton button){
+		for(CustomButton b : button.getNeighbours()){
+			if(b.isEnabled() && !b.isFlagged()){
+				b.setEnabled(false);
+				b.revealNumber();
+
+				if(b.isEmpty()) revealNeighbours(b);
+			}
+		}
 	}
 
 }

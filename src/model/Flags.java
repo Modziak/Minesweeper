@@ -9,6 +9,7 @@ public final class Flags {
 
 	private Flags(){}
 	
+	private static boolean IS_STARTED = false;
 	private static boolean BUTTON1_PRESSED = false;
 	private static boolean BUTTON3_PRESSED = false;
 	private static boolean BOTH_PRESSED = false;
@@ -55,5 +56,13 @@ public final class Flags {
 	
 	public static CustomButton getLastEntered(){
 		return LAST_ENTERED;
+	}
+	
+	public static boolean isStarted(){
+		return IS_STARTED;
+	}
+	
+	public static void setStarted(boolean isStarted){
+		IS_STARTED = isStarted;
 	}
 }

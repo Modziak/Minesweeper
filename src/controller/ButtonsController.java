@@ -7,11 +7,12 @@ import java.util.List;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import model.Flags;
 import model.Logic;
 import view.ButtonPanel;
 import view.CustomButton;
 
-public class ButtonsController implements ChangeButtonListener{
+public class ButtonsController implements StartListener{
 	
 	private static ButtonsController controller;
 	
@@ -21,9 +22,7 @@ public class ButtonsController implements ChangeButtonListener{
 	private ButtonsController(Logic logic, ButtonPanel panel){
 		this.logic = logic;
 		this.panel = panel;
-		
-		logic.setButtons(panel.getButtons());
-		logic.generateMines();
+
 		addListeners();
 	}
 	
@@ -37,12 +36,17 @@ public class ButtonsController implements ChangeButtonListener{
 	 */
 	private void addListeners(){
 		logic.addChangeButtonListener(this);
-		panel.addListeners(new CustomMouseAdapter(), new ButtonChangeListener());
+		
+		CustomMouseAdapter adapter = new CustomMouseAdapter();
+		adapter.addStartListener(this);
+		panel.addListeners(adapter, new ButtonChangeListener());
 	}
 	
 	@Override
-	public void pressButton(List<int[]> buttons) {
-		// TODO Auto-generated method stub
+	public void generateBoard(CustomButton button) {
+		Flags.setStarted(true);
+		logic.setButtons(panel.getButtons());
+		logic.generateMines(button);
 		
 	}
 	
