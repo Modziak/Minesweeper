@@ -8,15 +8,21 @@ import java.util.List;
 import javax.swing.ButtonModel;
 import javax.swing.JToggleButton;
 
+import exceptions.MineRevealed;
 import model.Flags;
 import view.CustomButton;
 
 public class CustomMouseAdapter extends MouseAdapter{
 	
-	private StartListener listener;
+	private StartListener startListener;
+	private InfoListener infoListener;
 	
 	public void addStartListener(StartListener listener){
-		this.listener = listener;
+		startListener = listener;
+	}
+	
+	public void addInfoListener(InfoListener listener){
+		infoListener = listener;
 	}
 	
 	/*
@@ -34,7 +40,10 @@ public class CustomMouseAdapter extends MouseAdapter{
 		
 		if(!Flags.bothPressed()){
 			Flags.setLastEntered(button);
-			if(evt.getButton() == 3 && button.isEnabled()) button.setNextState();
+			if(evt.getButton() == 3 && button.isEnabled()){
+				int state = button.setNextState();
+				infoListener.updateMinesCount(state == 1 ? -1 : state == 2 ? 1 : 0);
+			}
 		}
 		else pressNeighbours(Flags.getLastEntered());
 		
@@ -45,32 +54,38 @@ public class CustomMouseAdapter extends MouseAdapter{
 	public void mouseReleased(MouseEvent evt){
 		
 		CustomButton button = Flags.getLastEntered();
-
-		if(button != null){
-			if(!Flags.isStarted()) listener.generateBoard(button);
-			if(!Flags.bothPressed()){
-				if(evt.getButton() == 1 && button.isEnabled() && !button.isFlagged()){
-					/*
-					 * Najbardziej ³opatologiczne rozwiazanie
-					 */
-					button.setEnabled(false);
-					button.reset();
-					button.revealNumber();
-					if(button.isEmpty()) revealNeighbours(Flags.getLastEntered());
-					Flags.setLastEntered(null);	
+		try{
+			if(button != null){
+				if(!Flags.isStarted()) startListener.generateBoard(button);
+				if(!Flags.bothPressed()){
+					if(evt.getButton() == 1 && button.isEnabled() && !button.isFlagged()){
+						/*
+						 * Najbardziej ³opatologiczne rozwiazanie
+						 */
+						button.setEnabled(false);
+						button.reset();
+						button.revealNumber();
+						infoListener.updateTilesCount(1);
+						if(button.isEmpty()){
+							infoListener.updateTilesCount(revealNeighbours(Flags.getLastEntered()));
+						}
+						Flags.setLastEntered(null);	
+					}
+				}
+				else if(Flags.bothPressed()){
+					if(button.checkFlags()){
+						infoListener.updateTilesCount(revealNeighbours(Flags.getLastEntered()));
+					}
+					clearNeigbours(Flags.getLastEntered());
+					
 				}
 			}
-			else if(Flags.bothPressed()){
-				if(button.checkFlags()) revealNeighbours(Flags.getLastEntered());
-				clearNeigbours(Flags.getLastEntered());
-			}
-		}
-		
-		Flags.setButtonPressed(evt.getButton(), false);
-		
+			Flags.setButtonPressed(evt.getButton(), false);
+		}catch(MineRevealed mine){
+			startListener.playerLost();
+		}	
 	}
 
-	
 	@Override
 	public void mouseEntered(MouseEvent evt){
 		
@@ -80,8 +95,9 @@ public class CustomMouseAdapter extends MouseAdapter{
 		Flags.setLastEntered(button);
 		
 		if(Flags.isButton1Pressed()){
-			model.setPressed(true);
-			model.setArmed(true);
+			button.setState(true);
+//			model.setPressed(true);
+//			model.setArmed(true);
 		}
 		if(Flags.bothPressed()) pressNeighbours(button); 
 		
@@ -110,21 +126,21 @@ public class CustomMouseAdapter extends MouseAdapter{
 	
 	private void clearNeigbours(CustomButton button){
 		ArrayList<CustomButton> buttons = button.getNeighbours();
-//		button.setState(false);
-//		for(CustomButton b : buttons) b.setState(false);
-//		button.reset();
 		for(CustomButton b : buttons) b.reset();
 	}
 	
-	private void revealNeighbours(CustomButton button){
+	private int revealNeighbours(CustomButton button) throws MineRevealed{
+		int tilesRevealed = 0;
 		for(CustomButton b : button.getNeighbours()){
 			if(b.isEnabled() && !b.isFlagged()){
-				b.setEnabled(false);
 				b.revealNumber();
-
-				if(b.isEmpty()) revealNeighbours(b);
+				b.setEnabled(false);
+				tilesRevealed++;
+				if(b.isEmpty()) tilesRevealed += revealNeighbours(b);
 			}
 		}
+		
+		return tilesRevealed;
 	}
 
 }

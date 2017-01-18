@@ -22,6 +22,7 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 
 import controller.Tile;
+import exceptions.MineRevealed;
 import model.SavedVariables;
 
 public class CustomButton extends JToggleButton implements Tile{
@@ -88,6 +89,7 @@ public class CustomButton extends JToggleButton implements Tile{
 	public void setState(boolean state){
 		if(isEnabled()){
 			ButtonModel model = getModel();
+			
 			model.setPressed(state);
 			model.setArmed(state);
 		}
@@ -102,9 +104,10 @@ public class CustomButton extends JToggleButton implements Tile{
 		return y;
 	}
 	
-	public void setNextState(){
+	public int setNextState(){
 		currState += currState != 2 ? 1 : -2;
 		setIcons();
+		return currState;
 	}
 	
 //	public void setRevealed(){
@@ -150,7 +153,7 @@ public class CustomButton extends JToggleButton implements Tile{
 		return !isEnabled() && nFlags == minesAround;
 	}
 	
-	public void revealNumber(){
+	public void revealNumber() throws MineRevealed{
 		
 		setHorizontalTextPosition(SwingConstants.CENTER);
 		currState = 3;
@@ -159,7 +162,10 @@ public class CustomButton extends JToggleButton implements Tile{
 				setDisabledIcon(createGraphics(TRANSPARENT));
 			}
 		}
-		else setText("M");
+		else{
+			setText("M");
+			throw new MineRevealed();
+		}
 	}
 	
 	/*

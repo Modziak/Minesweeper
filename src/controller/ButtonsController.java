@@ -1,16 +1,12 @@
 package controller;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.List;
-
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.JOptionPane;
 
 import model.Flags;
 import model.Logic;
 import view.ButtonPanel;
 import view.CustomButton;
+import view.MainFrame;
 
 public class ButtonsController implements StartListener{
 	
@@ -18,6 +14,8 @@ public class ButtonsController implements StartListener{
 	
 	private Logic logic;
 	private ButtonPanel panel;
+	private InfoListener info;
+	private CustomMouseAdapter adapter;
 
 	private ButtonsController(Logic logic, ButtonPanel panel){
 		this.logic = logic;
@@ -35,11 +33,16 @@ public class ButtonsController implements StartListener{
 	 * Niepotrzebny aktualnie: ChangeButtonListener i ButtonChangeListener 
 	 */
 	private void addListeners(){
-		logic.addChangeButtonListener(this);
+//		logic.addChangeButtonListener(this);
 		
-		CustomMouseAdapter adapter = new CustomMouseAdapter();
+		adapter = new CustomMouseAdapter();
 		adapter.addStartListener(this);
-		panel.addListeners(adapter, new ButtonChangeListener());
+		panel.addListeners(adapter);
+	}
+	
+	public void addInfoListener(InfoListener listener){
+		info = listener;
+		adapter.addInfoListener(listener);
 	}
 	
 	@Override
@@ -47,16 +50,43 @@ public class ButtonsController implements StartListener{
 		Flags.setStarted(true);
 		logic.setButtons(panel.getButtons());
 		logic.generateMines(button);
-		
-	}
-	
-	class ButtonChangeListener implements ChangeListener{
-
-		@Override
-		public void stateChanged(ChangeEvent e) {
-			logic.checkTile((CustomButton) e.getSource());	
-		}
-		
+		info.startTimer();
 	}
 
+	@Override
+	public void playerLost() {
+		info.stopTimer();
+		panel.disableAll();
+		JOptionPane.showMessageDialog(MainFrame.getFrame(), 
+				"Przegra³eœ. Spróbuj jeszcze raz.", 
+				"", 
+				JOptionPane.INFORMATION_MESSAGE);
+		
+	}
+
+	@Override
+	public void playerWon() {
+		info.stopTimer();
+		panel.disableAll();
+		JOptionPane.showMessageDialog(MainFrame.getFrame(), 
+				"Wygra³eœ!", 
+				"", 
+				JOptionPane.INFORMATION_MESSAGE);
+		
+	}
+
+	@Override
+	public void restart() {
+		
+		if(Flags.isStarted()) info.stopTimer();
+		Flags.resetAll();
+		MainFrame.getFrame().remove(panel);
+		panel = ButtonPanel.createNewPanel();
+		panel.addListeners(adapter);
+		MainFrame.getFrame().add(panel, "cell 0 0");
+		panel.revalidate();
+		panel.repaint();
+		MainFrame.getFrame().pack();
+		
+	}
 }

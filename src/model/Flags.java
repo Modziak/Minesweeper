@@ -65,4 +65,11 @@ public final class Flags {
 	public static void setStarted(boolean isStarted){
 		IS_STARTED = isStarted;
 	}
+	
+	public static void resetAll(){
+		IS_STARTED = false;
+		BUTTON1_PRESSED = false;
+		BUTTON3_PRESSED = false;
+		BOTH_PRESSED = false;
+	}
 }

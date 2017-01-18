@@ -38,14 +38,14 @@ public class Logic {
 		for(int i=0; i<tilesCount; i++) randList.add(i);
 		
 		randList.remove(button.getRelativeX()*y + button.getRelativeY());
-		int i = 1;
+		int tilesRemoved = 1;
 		for(CustomButton b : button.getNeighbours()){
 			randList.remove(randList.indexOf(b.getRelativeX()*y + b.getRelativeY()));
-			i++;
+			tilesRemoved++;
 		}
 		
-		for(; i<minesCount; i++){
-			tileNumber = randList.remove(rand.nextInt(tilesCount-i));
+		for(int i = 0; i<minesCount; i++){
+			tileNumber = randList.remove(rand.nextInt(tilesCount-i-tilesRemoved));
 			mineX = tileNumber / y;
 			mineY = tileNumber % y;
 			tiles[mineX][mineY].setAsMine(true);
@@ -54,15 +54,6 @@ public class Logic {
 			}
 		}
 		
-	}
-	
-	public void checkTile(CustomButton tile){
-		if(tile.isMine()){
-			
-		}
-		else{
-			tile.revealNumber();
-		}
 	}
 	
 	public void setButtons(CustomButton[][] buttons){

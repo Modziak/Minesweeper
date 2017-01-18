@@ -5,6 +5,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeListener;
 
@@ -18,7 +19,7 @@ public class ButtonPanel extends JPanel{
 	private CustomButton[][] buttons;
 	private Dimension dimension;
 	
-	private ButtonPanel(){
+	public ButtonPanel(){
 		this.x = SavedVariables.getX();
 		this.y = SavedVariables.getY();
 		
@@ -32,12 +33,24 @@ public class ButtonPanel extends JPanel{
 		return panel != null ? panel : (panel = new ButtonPanel());
 	}
 	
-	public void destroyPanel(){
-		panel = null;
+	public static ButtonPanel createNewPanel(){
+		return panel = new ButtonPanel();
 	}
+	
+//	public void destroyPanel(){
+//		buttons = null;
+//		setLayout(null);
+//	}
 	
 	public CustomButton[][] getButtons(){
 		return buttons;
+	}
+	
+	public void disableAll(){
+		for(CustomButton[] bb : buttons){
+			for(CustomButton b : bb) b.setEnabled(false);
+			
+		}
 	}
 
 	/*
@@ -45,7 +58,7 @@ public class ButtonPanel extends JPanel{
 	 * Umo¿liæ zmianê liczby kafelków
 	 * Wyeliminowaæ koniecznoœæ dzielenia za ka¿dym razem : DONE
 	 */ 
-	private void populate(){
+	public void populate(){
 		
 		buttons = new CustomButton[this.x][this.y];
 		double tempValue = (255/46)/2;
@@ -77,11 +90,10 @@ public class ButtonPanel extends JPanel{
 		}
 	}
 	
-	public void addListeners(MouseAdapter adapter, ChangeListener listener){
+	public void addListeners(MouseAdapter adapter){
 		for(int x=0; x<this.x; x++){
 			for(int y=0; y<this.y; y++){
 				buttons[x][y].addMouseListener(adapter);
-//				buttons[x][y].addChangeListener(listener);
 			}
 		}
 	}

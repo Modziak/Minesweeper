@@ -6,6 +6,10 @@ import net.miginfocom.swing.MigLayout;
 
 public class MainFrame extends JFrame{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1585407456367611962L;
 	private static MainFrame frame;
 	
 	private MainFrame(){
@@ -13,12 +17,10 @@ public class MainFrame extends JFrame{
 		
 		setLayout(new MigLayout("",
 								"[fill]",
-								"[fill]"));
+								"[fill][fill]"));
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setResizable(false);
-		
-		
 	}
 	
 	public static MainFrame getFrame(){
